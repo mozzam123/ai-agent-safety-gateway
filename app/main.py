@@ -5,6 +5,7 @@ from app.agent.graph import graph
 from app.guardrails.engine import GuardrailEngine
 from app.guardrails.input.blocked_topic import BlockedTopicGuard
 from app.guardrails.input.prompt_injection import PromptInjectionGuard
+from app.guardrails.input.pii import PIIGuard
 from app.guardrails.decisions import GuardrailDecision
 
 
@@ -22,6 +23,7 @@ input_guardrail_engine = GuardrailEngine(
     guardrails=[
         PromptInjectionGuard(),
         BlockedTopicGuard(),
+        PIIGuard(),
     ]
 )
 
