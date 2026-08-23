@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any
 
 from app.guardrails.decisions import GuardrailDecision
 
@@ -14,5 +15,5 @@ class GuardrailResult:
 class Guardrail(ABC):
 
     @abstractmethod
-    def check(self, text: str) -> GuardrailResult:
+    def check(self, value: Any) -> GuardrailResult:
         pass
