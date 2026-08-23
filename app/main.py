@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from app.agent.graph import graph
 from app.guardrails.engine import GuardrailEngine
+from app.guardrails.output.pii import OutputPIIGuard
 from app.guardrails.input.blocked_topic import BlockedTopicGuard
 from app.guardrails.input.prompt_injection import PromptInjectionGuard
 from app.guardrails.input.pii import PIIGuard
@@ -24,6 +25,12 @@ input_guardrail_engine = GuardrailEngine(
         PromptInjectionGuard(),
         BlockedTopicGuard(),
         PIIGuard(),
+    ]
+)
+
+output_guardrail_engine = GuardrailEngine(
+    guardrails=[
+        OutputPIIGuard(),
     ]
 )
 
@@ -52,7 +59,18 @@ async def chat(request: ChatRequest):
         }
     )
 
+    response_text = result["messages"][-1].content
+
+    output_result = output_guardrail_engine.check(response_text)
+
+    if output_result.decision == GuardrailDecision.BLOCK:
+
+        return {
+            "decision": "block",
+            "reason": output_result.reason,
+        }
+
     return {
         "decision": "allow",
-        "response": result["messages"][-1].content,
+        "response": response_text,
     }

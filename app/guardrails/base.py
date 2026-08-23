@@ -8,9 +8,11 @@ from app.guardrails.decisions import GuardrailDecision
 class GuardrailResult:
     decision: GuardrailDecision
     reason: str
+    transformed_text: str | None = None
 
 
 class Guardrail(ABC):
+
     @abstractmethod
     def check(self, text: str) -> GuardrailResult:
         pass
