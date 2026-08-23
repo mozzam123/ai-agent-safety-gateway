@@ -1,4 +1,5 @@
 from langchain_core.messages import ToolMessage
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
 from langgraph.types import interrupt
@@ -163,4 +164,6 @@ builder.add_conditional_edges(
 
 builder.add_edge("tools", "agent")
 
-graph = builder.compile()
+checkpointer = SqliteSaver.from_conn_string("checkpoints.db")
+
+graph = builder.compile(checkpointer=checkpointer)

@@ -8,6 +8,7 @@ from app.guardrails.input.blocked_topic import BlockedTopicGuard
 from app.guardrails.input.prompt_injection import PromptInjectionGuard
 from app.guardrails.input.pii import PIIGuard
 from app.guardrails.decisions import GuardrailDecision
+from langgraph.types import Command
 
 
 app = FastAPI(
@@ -51,12 +52,29 @@ async def chat(request: ChatRequest):
             "reason": guardrail_result.reason,
         }
 
+    config = {
+        "configurable": {
+            "thread_id": "demo-request-1",
+        }
+    }
+
     result = graph.invoke(
         {
             "messages": [
                 ("user", request.message),
             ]
-        }
+        },
+        config=config,
+    )
+
+    result = graph.invoke(
+        Command(resume="approve"),
+        config=config,
+    )
+
+    result = graph.invoke(
+        Command(resume="reject"),
+        config=config,
     )
 
     response_text = result["messages"][-1].content
