@@ -7,19 +7,15 @@ class ToolArgumentGuard(Guardrail):
 
     def check(self, value: ToolRequest) -> GuardrailResult:
 
-        if value.tool_name == "get_weather":
-            city = value.arguments.get("city")
+        # delete_file validation
+        if value.tool_name == "delete_file":
 
-            if not isinstance(city, str) or not city.strip():
+            path = value.arguments.get("path")
+
+            if not isinstance(path, str) or not path.strip():
                 return GuardrailResult(
                     decision=GuardrailDecision.BLOCK,
-                    reason="Weather tool requires a valid city.",
-                )
-
-            if len(city) > 100:
-                return GuardrailResult(
-                    decision=GuardrailDecision.BLOCK,
-                    reason="City name is too long.",
+                    reason="delete_file requires a valid file path.",
                 )
 
         return GuardrailResult(
