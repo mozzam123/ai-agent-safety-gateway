@@ -1,3 +1,4 @@
+import time
 from langchain_core.messages import ToolMessage, AIMessage
 from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
@@ -135,6 +136,7 @@ def execute_tools(state: AgentState):
                     "tool_name": tool_name,
                     "arguments": arguments,
                     "reason": guardrail_result.reason,
+                    "created_at": time.time(),
                 }
             )
 

@@ -7,6 +7,7 @@ class PendingApproval(TypedDict):
     tool_name: str
     arguments: dict
     tool_call_id: str
+    created_at: float
 
 
 class AgentState(TypedDict):
