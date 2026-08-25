@@ -1,4 +1,4 @@
-from langchain_core.messages import ToolMessage
+from langchain_core.messages import ToolMessage, AIMessage
 from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
 from langgraph.types import interrupt
@@ -51,13 +51,26 @@ tool_guardrail_engine = GuardrailEngine(
 
 
 def call_model(state: AgentState):
-    """Run the LLM and allow it to request tools."""
+    """Run the LLM and safely handle LLM failures."""
 
-    response = llm.invoke(state["messages"])
+    try:
+        response = llm.invoke(state["messages"])
 
-    return {
-        "messages": [response],
-    }
+        return {
+            "messages": [response],
+        }
+
+    except Exception:
+        return {
+            "messages": [
+                AIMessage(
+                    content=(
+                        "I'm unable to process your request right now. "
+                        "Please try again later."
+                    )
+                )
+            ]
+        }
 
 
 # ---------------------------------------------------------
@@ -157,7 +170,16 @@ def execute_tools(state: AgentState):
         # Execute tool
         # ---------------------------------------------
 
-        result = tool.invoke(arguments)
+        try:
+            result = tool.invoke(arguments)
+
+        except Exception:
+            tool_messages.append(
+                ToolMessage(
+                    content="Tool execution failed.",
+                    tool_call_id=tool_call["id"],
+                )
+            )
 
         tool_messages.append(
             ToolMessage(
