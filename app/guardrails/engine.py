@@ -11,29 +11,27 @@ class GuardrailEngine:
         results: list[GuardrailResult] = []
 
         for guardrail in self.guardrails:
-            result = guardrail.check(value)
+
+            try:
+                result = guardrail.check(value)
+
+            except Exception:
+                return GuardrailResult(
+                    decision=GuardrailDecision.BLOCK,
+                    reason="Guardrail execution failed.",
+                )
 
             results.append(result)
 
-        # ---------------------------------------------
         # BLOCK has highest priority
-        # ---------------------------------------------
-
         for result in results:
             if result.decision == GuardrailDecision.BLOCK:
                 return result
 
-        # ---------------------------------------------
         # REQUIRE_APPROVAL has second priority
-        # ---------------------------------------------
-
         for result in results:
             if result.decision == GuardrailDecision.REQUIRE_APPROVAL:
                 return result
-
-        # ---------------------------------------------
-        # Everything passed
-        # ---------------------------------------------
 
         return GuardrailResult(
             decision=GuardrailDecision.ALLOW,
