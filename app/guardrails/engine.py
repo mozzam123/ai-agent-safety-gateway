@@ -1,5 +1,8 @@
 from app.guardrails.base import Guardrail, GuardrailResult
 from app.guardrails.decisions import GuardrailDecision
+from app.core.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class GuardrailEngine:
@@ -14,6 +17,11 @@ class GuardrailEngine:
 
             try:
                 result = guardrail.check(value)
+                logger.info(
+                    "guardrail=%s decision=%s",
+                    guardrail.__class__.__name__,
+                    result.decision,
+                )
 
             except Exception:
                 return GuardrailResult(

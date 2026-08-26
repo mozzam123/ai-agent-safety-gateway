@@ -4,6 +4,7 @@ from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
 from langgraph.types import interrupt
 from langgraph.checkpoint.memory import InMemorySaver
+from app.core.logging import get_logger
 
 from app.agent.state import AgentState
 from app.agent.tools import calculate, get_weather
@@ -14,6 +15,8 @@ from app.guardrails.tool.authorization import ToolAuthorizationGuard
 from app.guardrails.tool.models import ToolRequest
 from app.llm.provider import get_llm
 
+
+logger = get_logger(__name__)
 
 # ---------------------------------------------------------
 # Tools available to the agent
@@ -109,6 +112,12 @@ def execute_tools(state: AgentState):
 
         guardrail_result = tool_guardrail_engine.check(tool_request)
 
+        logger.info(
+            "tool=%s guardrail_decision=%s",
+            tool_name,
+            guardrail_result.decision,
+        )
+
         # ---------------------------------------------
         # BLOCK
         # ---------------------------------------------
@@ -181,6 +190,10 @@ def execute_tools(state: AgentState):
                     content="Tool execution failed.",
                     tool_call_id=tool_call["id"],
                 )
+            )
+            logger.exception(
+                "tool_execution_failed tool=%s",
+                tool_name,
             )
 
         tool_messages.append(
